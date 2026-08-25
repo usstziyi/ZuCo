@@ -11,7 +11,7 @@
 
 import os
 import numpy as np
-import mat73
+import mat73 # 建立在h5py的基础上
 from tqdm import tqdm
 import pickle
 import argparse
