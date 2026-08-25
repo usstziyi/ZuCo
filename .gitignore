@@ -44,3 +44,5 @@ results/
 
 *.safetensors
 *.json
+
+EEG_data/

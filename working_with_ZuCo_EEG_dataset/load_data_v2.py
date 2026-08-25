@@ -52,19 +52,19 @@ def ZuCo_data_v2(data_dir,save_data_dir,verbose=True):
                 
                 # sent level eeg 
                 # mean_t1 = np.squeeze(f[sentence_data['mean_t1'][0][0]][()])
-                mean_t1_objs = sentence_data['mean_t1']
-                mean_t2_objs = sentence_data['mean_t2']
-                mean_a1_objs = sentence_data['mean_a1']
-                mean_a2_objs = sentence_data['mean_a2']
-                mean_b1_objs = sentence_data['mean_b1']
-                mean_b2_objs = sentence_data['mean_b2']
-                mean_g1_objs = sentence_data['mean_g1']
-                mean_g2_objs = sentence_data['mean_g2']
+                mean_t1_objs = sentence_data['mean_t1']  # Theta 1, 4-6 Hz
+                mean_t2_objs = sentence_data['mean_t2']  # Theta 2, 6.5-8 Hz
+                mean_a1_objs = sentence_data['mean_a1']  # Alpha 1, 8.5-10 Hz
+                mean_a2_objs = sentence_data['mean_a2']  # Alpha 2, 10.5-13 Hz
+                mean_b1_objs = sentence_data['mean_b1']  # Beta 1, 13.5-18 Hz
+                mean_b2_objs = sentence_data['mean_b2']  # Beta 2, 18.5-30 Hz
+                mean_g1_objs = sentence_data['mean_g1']  # Gamma 1, 30.5-40 Hz
+                mean_g2_objs = sentence_data['mean_g2']  # Gamma 2, 40-49.5 Hz
                 
-                rawData = sentence_data['rawData']
-                contentData = sentence_data['content']
-                omissionR = sentence_data['omissionRate']
-                wordData = sentence_data['word']
+                rawData = sentence_data['rawData']  # 原始 EEG 数据引用数组；它兼作"句子数量"的判据（L70 len(rawData) 就是句子数）
+                contentData = sentence_data['content'] # 每句话的文本内容引用（句子字符串，L72-73 解引用出 sent_string
+                omissionR = sentence_data['omissionRate'] # 每句话的遗漏率（reading omission rate，词被跳读的比例）
+                wordData = sentence_data['word'] # 每句话的词级数据引用（L93 传给 extract_word_level_data 提取词级特征）
 
 
                 for idx in range(len(rawData)):

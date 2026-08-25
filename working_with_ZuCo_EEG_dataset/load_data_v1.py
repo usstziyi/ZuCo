@@ -119,7 +119,7 @@ def ZuCo_data_v1(data_dir,save_data_dir,verbose=True):
 
 if __name__ == "__main__":
 
-    loc_data = '/home/sposso22/Documents/datasets/ZuCo'
+    loc_data = 'datasets/ZuCo1.0'
     parser = argparse.ArgumentParser(description='Load EEG data from version 1 of the ZuCo dataset')
     parser.add_argument('--data_dir', type=str, default=loc_data, help='Path to the ZuCo data directory.')
     parser.add_argument('--save_data_dir', type=str, default=os.getcwd(), help='Path to save the processed dataset. Defaults to current working directory.')
