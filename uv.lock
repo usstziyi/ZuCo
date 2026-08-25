@@ -1155,6 +1155,19 @@ wheels = [
 ]
 
 [[package]]
+name = "mat73"
+version = "0.65"
+source = { registry = "https://mirrors.aliyun.com/pypi/simple/" }
+dependencies = [
+    { name = "h5py" },
+    { name = "numpy" },
+]
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/92/61/0e6375513085b13ad23ab150fc83d4d8faa91cba56eb2f30b646259f8214/mat73-0.65.tar.gz", hash = "sha256:ad38a06af3d483632bd939ee572b3724ea8c03d37916765d7278f9de95541ade" }
+wheels = [
+    { url = "https://mirrors.aliyun.com/pypi/packages/c9/24/e867b1b89b2a2102a5a3bb64ddcd49c5cb815244b2dadff7740c6a422e4f/mat73-0.65-py3-none-any.whl", hash = "sha256:aadfcd00f328eb8f75dd1d4a060a956dc0abefcf5af20f5bc69a5aae64d62cbf" },
+]
+
+[[package]]
 name = "matplotlib"
 version = "3.11.1"
 source = { registry = "https://mirrors.aliyun.com/pypi/simple/" }
@@ -2766,13 +2779,14 @@ wheels = [
 [[package]]
 name = "zuco"
 version = "0.1.0"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "accelerate" },
     { name = "bitsandbytes" },
     { name = "braindecode", extra = ["hub", "moabb"] },
     { name = "datasets" },
     { name = "lightning" },
+    { name = "mat73" },
     { name = "mne" },
     { name = "peft" },
     { name = "rich" },
@@ -2791,6 +2805,7 @@ requires-dist = [
     { name = "braindecode", extras = ["hub", "moabb"], specifier = ">=1.7.0" },
     { name = "datasets", specifier = ">=5.0.1" },
     { name = "lightning", specifier = ">=2.6.5" },
+    { name = "mat73", specifier = ">=0.65" },
     { name = "mne", specifier = ">=1.12.1" },
     { name = "peft", specifier = ">=0.20.0" },
     { name = "rich", specifier = ">=15.0.0" },
