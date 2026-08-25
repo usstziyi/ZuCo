@@ -7,11 +7,12 @@
     char -> str（自动解码）, 数值 -> ndarray（自动 squeeze）,
     HDF5 对象引用 -> 自动解引用
 因此不再依赖 utils_load_data_v2.py 里的 h5py 辅助函数。
+mat73 建立在 h5py 的基础上。
 """
 
 import os
 import numpy as np
-import mat73 # 建立在h5py的基础上
+import mat73
 from tqdm import tqdm
 import pickle
 import argparse
