@@ -9,36 +9,39 @@ import argparse
 
 def ZuCo_data_v1(data_dir,save_data_dir,verbose=True):
 
-    EEG_data = os.path.join(save_data_dir, 'EEG_data')
+    EEG_data = os.path.join(save_data_dir, 'EEG_data', 'ZuCo1.0')
     os.makedirs(EEG_data, exist_ok=True)
     if verbose:
         print('Saving processed data to ', EEG_data)
 
-     # Loop over the three tasks
-
-    for task in tqdm(['task1-SR', 'task2-NR', 'task3-TSR'], desc="Tasks"):
+    # 跟踪任务进度
+    for task in tqdm(['task1-SR', 'task2-NR', 'task3-TSR'], desc="Tasks",leave=True):
         if verbose:
-            print('Processing ', task)
+            print('\nProcessing ', task)
 
         input_mat_files_dir = os.path.join(data_dir, task, 'Matlab_files')
         mat_files = os.listdir(input_mat_files_dir)
         path_mat_files = [os.path.join(input_mat_files_dir,mat_file) for mat_file in mat_files]
+
         dataset_dict = {}
-        for mat_file in tqdm(path_mat_files,desc=f"Processing {task} files"):
+        # 跟踪多文件处理进度
+        for mat_file in tqdm(path_mat_files,desc=f"Processing {task} files",leave=True):
             #get subject id from the file name
             subject_name = os.path.basename(mat_file).split('.')[0].replace('results','').strip()
-            dataset_dict[subject_name] = []
+            dataset_dict[subject_name] = [] # one person's list of sentence objects:[sentence_obj, sentence_obj, ...]
 
             mat_data = io.loadmat(mat_file,squeeze_me=True,struct_as_record=False)['sentenceData']
 
             if verbose:
-                print('Processing subject ', subject_name)
+                print('\nProcessing subject ', subject_name)
 
 
-              # Sentence level data
+            # Sentence level data
             for sent in mat_data: 
 
                 word_data = sent.word
+
+                # 检查 word_data 是否为有效数据（非 float 类型通常为 numpy 数组或结构体，包含单词级别的数据；若为 float 则多为 NaN 或缺失值）
                 if not isinstance(word_data, float):
 
                     # First key: sentence content
@@ -59,13 +62,13 @@ def ZuCo_data_v1(data_dir,save_data_dir,verbose=True):
                                                 'answer_mean_g1':sent.answer_mean_g1, 'answer_mean_g2':sent.answer_mean_g2}
                                                 
 
-                    # world level data
+                    # word level data
                     sent_obj['word'] = []
 
                     # Features from eye-tracking 
-                    word_tokens_has_fixation =[]
-                    word_tokens_with_mask = []
-                    word_tokens_all = []
+                    word_tokens_has_fixation =[] # 存储有_fixations的单词内容
+                    word_tokens_with_mask = []   # 存储有_mask的单词内容
+                    word_tokens_all = []         # 存储所有单词内容
 
                     for word in word_data:
                         word_obj = {'content': word.content}
@@ -74,6 +77,7 @@ def ZuCo_data_v1(data_dir,save_data_dir,verbose=True):
                         word_obj['n_fixations'] = word.nFixations
 
         
+                        # 检查当前单词是否有实际的注视数据（注视次数为正整数）
                         if isinstance(word.nFixations, (int, np.integer)) and word.nFixations > 0:
 
                             word_obj['word_level_EEG'] = {'FFD':{'FFD_t1':word.FFD_t1, 'FFD_t2':word.FFD_t2, 
@@ -94,7 +98,7 @@ def ZuCo_data_v1(data_dir,save_data_dir,verbose=True):
                             word_tokens_with_mask.append(word.content)
 
                         else:
-
+                            # 未被注视的词，用MASK表示
                             word_tokens_with_mask.append('[MASK]')
                             
                             continue
@@ -112,7 +116,8 @@ def ZuCo_data_v1(data_dir,save_data_dir,verbose=True):
         with open(os.path.join(EEG_data, output_file), 'wb') as handle:    
             pickle.dump(dataset_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
         if verbose:
-            print(f'Saved {task} dataset to {os.path.join(EEG_data, output_file)}')
+            print(f'\nSaved {task} dataset to {os.path.join(EEG_data, output_file)}')
+
 
 
 if __name__ == "__main__":
@@ -125,5 +130,65 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    
+    # 处理 ZuCo v1 数据集的 mat 数据并保存为 pkl 文件
     ZuCo_data_v1(args.data_dir, args.save_data_dir, args.verbose)
-                
+
+    # 读取 task1-SR_v1.pkl 文件
+    with open(os.path.join(args.save_data_dir, "EEG_data/ZuCo1.0", 'task1-SR_v1.pkl'), 'rb') as handle:
+        dataset_dict = pickle.load(handle)
+        print(dataset_dict.keys())
+
+    # 读取 task1-NR_v1.pkl 文件
+    with open(os.path.join(args.save_data_dir, "EEG_data/ZuCo1.0", 'task2-NR_v1.pkl'), 'rb') as handle:
+        dataset_dict = pickle.load(handle)
+        print(dataset_dict.keys())
+    
+    with open(os.path.join(args.save_data_dir, "EEG_data/ZuCo1.0", 'task3-TSR_v1.pkl'), 'rb') as handle:
+        dataset_dict = pickle.load(handle)
+        print(dataset_dict.keys())
+
+
+"""
+dataset_dict = {
+    subjectA: [sent_obj, ...],   # 来自 subjectA 的 .mat
+    subjectB: [sent_obj, ...],   # 来自 subjectB 的 .mat
+    ...
+}
+"""
+
+"""
+dataset_dict (dict)
+ └── <subject_name> (str, 由文件名解析) : list
+      │
+      └── sent_obj (dict)   ← 每个有效句子的结构
+           │
+           ├── "content" : str                          # 句子文本
+           │
+           ├── "sentence_level_EEG" (dict)              # 整句 8 个频带均值
+           │    ├── mean_t1  mean_t2   (theta)
+           │    ├── mean_a1  mean_a2   (alpha)
+           │    ├── mean_b1  mean_b2   (beta)
+           │    └── mean_g1  mean_g2   (gamma)
+           │
+           ├── "answer_EEG" (dict)   ◀ 仅 task1-SR 存在
+           │    ├── answer_mean_t1  answer_mean_t2
+           │    ├── answer_mean_a1  answer_mean_a2
+           │    ├── answer_mean_b1  answer_mean_b2
+           │    └── answer_mean_g1  answer_mean_g2
+           │
+           ├── "word" : list                            # 有注视(fixation)的词
+           │    │
+           │    └── word_obj (dict)   ← 仅 nFixations>0 的词
+           │         ├── "content" : str
+           │         ├── "n_fixations" : int
+           │         └── "word_level_EEG" (dict)        # 每个词 3 类 × 8 频带
+           │              ├── "FFD"   : {FFD_t1, FFD_t2, FFD_a1, FFD_a2,
+           │              │             FFD_b1, FFD_b2, FFD_g1, FFD_g2}
+           │              ├── "TRT"   : {TRT_* 同上 8 个}
+           │              └── "GD"    : {GD_*  同上 8 个}
+           │
+           ├── "word_tokens_has_fixation" : list[str]   # 有注视词内容
+           ├── "word_tokens_with_mask" : list[str]      # 无注视词用 "[MASK]" 占位
+           └── "word_tokens_all" : list[str]            # 该句全部词内容
+"""
