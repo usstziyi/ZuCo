@@ -33,14 +33,15 @@ def custom_columns_progress():
     # 这里把"动画、描述、横条、百分比、数字、耗时、剩余时间"拼成一个更丰富的进度条
     with Progress(
         SpinnerColumn(), # 加载动画
-        TextColumn("[progress.description] hello {task.description}"), # 任务描述
+        TextColumn("[bold]{task.fields[filename]}", justify="right"), # 文件名
+        TextColumn("[progress.description] ==> {task.description}"), # 任务描述
         BarColumn(), # 进度条
         TaskProgressColumn(), # 任务百分比
         MofNCompleteColumn(), # 已完成进度数
         TimeElapsedColumn(), # 已用时间
         TimeRemainingColumn(), # 剩余时间
     ) as progress:
-        task = progress.add_task("[red]下载中...", total=100)
+        task = progress.add_task("[red]下载中...",filename="movie.mp4", total=100)
         while not progress.finished:
             progress.update(task, advance=0.5)
             time.sleep(0.1)
