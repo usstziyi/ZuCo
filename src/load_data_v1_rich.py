@@ -1,7 +1,7 @@
 import scipy.io as io
 import os
-from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn
+from rich_demo.console import Console
+from rich_demo.progress import Progress, SpinnerColumn, BarColumn, TextColumn
 import numpy as np
 import pickle
 import argparse
@@ -143,5 +143,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # ZuCo_data_v1(args.data_dir, args.save_data_dir, args.verbose)
-    ZuCo_data_v1(args.data_dir, args.save_data_dir, True)
+    ZuCo_data_v1(args.data_dir, args.save_data_dir, args.verbose)
