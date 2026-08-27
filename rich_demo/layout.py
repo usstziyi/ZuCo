@@ -1,3 +1,5 @@
+from fileinput import filename
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, BarColumn, TextColumn, TaskProgressColumn
@@ -6,6 +8,7 @@ from rich.live import Live
 import time
 
 console = Console()
+files = ["文档.pdf", "图片.jpg", "视频.mp4", "音乐.mp3"]
 
 def progress_with_layout():
     """使用 Layout 组织多个进度条"""
@@ -15,7 +18,7 @@ def progress_with_layout():
     layout = Layout()
     layout.split_column(
         Layout(name="header", size=3),
-        Layout(name="body"),
+        Layout(name="body", size=6),
     )
     
     # 为每个任务创建独立的单行进度条
@@ -23,10 +26,11 @@ def progress_with_layout():
     for i in range(4):
         p = Progress(
             TextColumn(f"[bold cyan]任务 {i+1}[/bold cyan]", justify="left"),
-            BarColumn(bar_width=30),
+            TextColumn("[bold]{task.fields[filename]}", justify="right"), # 文件名
+            BarColumn(bar_width=None),
             TaskProgressColumn(),
         )
-        task_id = p.add_task("", total=100)
+        task_id = p.add_task("", filename=files[i], total=100)
         progress_bars.append((p, task_id))
     
     with Live(layout, console=console, refresh_per_second=10):
