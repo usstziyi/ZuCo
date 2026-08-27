@@ -45,7 +45,7 @@ def progress_with_subtasks():
 
     table = Table(show_header=True, header_style="bold magenta")
     table.add_column("任务", style="cyan")
-    table.add_column("子模块", width=8)
+    table.add_column("子任务", width=8)
     table.add_column("大小", style="yellow")
     table.add_column("状态", max_width=12)
     table.add_column("进度")
