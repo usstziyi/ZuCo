@@ -19,11 +19,15 @@ def ZuCo_data_v1(data_dir, save_data_dir, verbose=True):
     # Loop over the three tasks
     tasks = ['task1-SR', 'task2-NR', 'task3-TSR']
 
-    with Progress(SpinnerColumn(),
-                  TextColumn("[progress.description]{task.description}"),
-                  BarColumn(),
-                  TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-                  console=console) as progress:
+    with Progress(
+        SpinnerColumn(), # 加载动画
+        TextColumn("[progress.description]{task.description}"), # 任务描述
+        BarColumn(), # 进度条
+        TaskProgressColumn(), # 任务百分比
+        MofNCompleteColumn(), # 已完成进度数
+        TimeElapsedColumn(), # 已用时间
+        TimeRemainingColumn(), # 剩余时间
+    ) as progress:
 
         task_bar = progress.add_task("Tasks", total=len(tasks))
 
