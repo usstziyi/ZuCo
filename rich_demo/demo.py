@@ -67,14 +67,16 @@ def download_simulation():
     console.print("[bold cyan]4. 模拟下载进度条[/bold cyan]")
     with Progress(
         TextColumn("[bold blue]{task.fields[filename]}", justify="right"),
-        BarColumn(bar_width=None),
-        "[progress.percentage]{task.percentage:>3.1f}%",
+        BarColumn(bar_width=None), # 不限制宽度，让横条自动撑满剩余可用空间
+        "[progress.percentage]{task.percentage:>3.1f}%", # 任务百分比
         "•",
-        DownloadColumn(),
+        DownloadColumn(), # 下载速度
         "•",
-        TransferSpeedColumn(),
+        TransferSpeedColumn(), # 传输速度
         "•",
-        TimeRemainingColumn(),
+        TimeRemainingColumn(), # 剩余时间
+        "•",
+        TimeElapsedColumn(), # 已用时间
     ) as progress:
         for i in range(3):
             filename = f"file_{i+1}.zip"
@@ -141,9 +143,9 @@ def main():
     console.print("[bold yellow]Rich 进度条演示[/bold yellow]\n", justify="center")
     
     # basic_progress()
-    custom_columns_progress()
+    # custom_columns_progress()
     # multiple_tasks()
-    # download_simulation()
+    download_simulation()
     # indeterminate_progress()
     # progress_with_table()
     
