@@ -148,3 +148,51 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     ZuCo_data_v1(args.data_dir, args.save_data_dir)
+
+
+
+
+
+"""
+dataset_dict = {
+    subjectA: [sent_obj, ...],   # 来自 subjectA 的 .mat
+    subjectB: [sent_obj, ...],   # 来自 subjectB 的 .mat
+    ...
+}
+"""
+
+"""
+dataset_dict (dict)
+ └── <subject_name> (str, 由文件名解析) : list
+      │
+      └── sent_obj (dict)   ← 每个有效句子的结构
+           │
+           ├── "content" : str                          # 句子文本
+           │
+           ├── "sentence_level_EEG" (dict)              # 整句 8 个频带均值
+           │    ├── mean_t1  mean_t2   (theta)
+           │    ├── mean_a1  mean_a2   (alpha)
+           │    ├── mean_b1  mean_b2   (beta)
+           │    └── mean_g1  mean_g2   (gamma)
+           │
+           ├── "answer_EEG" (dict)   ◀ 仅 task1-SR 存在
+           │    ├── answer_mean_t1  answer_mean_t2
+           │    ├── answer_mean_a1  answer_mean_a2
+           │    ├── answer_mean_b1  answer_mean_b2
+           │    └── answer_mean_g1  answer_mean_g2
+           │
+           ├── "word" : list                            # 有注视(fixation)的词
+           │    │
+           │    └── word_obj (dict)   ← 仅 nFixations>0 的词
+           │         ├── "content" : str
+           │         ├── "n_fixations" : int
+           │         └── "word_level_EEG" (dict)        # 每个词 3 类 × 8 频带
+           │              ├── "FFD"   : {FFD_t1, FFD_t2, FFD_a1, FFD_a2,
+           │              │             FFD_b1, FFD_b2, FFD_g1, FFD_g2}
+           │              ├── "TRT"   : {TRT_* 同上 8 个}
+           │              └── "GD"    : {GD_*  同上 8 个}
+           │
+           ├── "word_tokens_has_fixation" : list[str]   # 有注视词内容
+           ├── "word_tokens_with_mask" : list[str]      # 无注视词用 "[MASK]" 占位
+           └── "word_tokens_all" : list[str]            # 该句全部词内容
+"""
