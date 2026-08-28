@@ -142,9 +142,9 @@ def main():
     # basic_progress()
     # custom_columns_progress()
     # multiple_tasks()
-    # download_simulation()
+    download_simulation()
     # indeterminate_progress()
-    progress_with_table()
+    # progress_with_table()
     
     console.print("[bold green]所有演示完成！[/bold green]")
 

@@ -1,47 +1,51 @@
 import scipy.io as io
 import os
-from rich_demo.console import Console
-from rich_demo.progress import Progress, SpinnerColumn, BarColumn, TextColumn
+from rich.console import Console
+from rich.progress import (
+    Progress,
+    SpinnerColumn,
+    BarColumn,
+    TextColumn,
+    TaskProgressColumn,
+    MofNCompleteColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
 import numpy as np
 import pickle
 import argparse
 
 
-def ZuCo_data_v1(data_dir, save_data_dir, verbose=True):
+def ZuCo_data_v1(data_dir, save_data_dir):
 
     console = Console()
 
     EEG_data = os.path.join(save_data_dir, 'EEG_data')
     os.makedirs(EEG_data, exist_ok=True)
-    if verbose:
-        console.print(f'Saving processed data to {EEG_data}')
 
     # Loop over the three tasks
     tasks = ['task1-SR', 'task2-NR', 'task3-TSR']
 
-    with Progress(
-        SpinnerColumn(), # 加载动画
-        TextColumn("[progress.description]{task.description}"), # 任务描述
-        BarColumn(), # 进度条
-        TaskProgressColumn(), # 任务百分比
-        MofNCompleteColumn(), # 已完成进度数
-        TimeElapsedColumn(), # 已用时间
-        TimeRemainingColumn(), # 剩余时间
-    ) as progress:
+    for task in tasks:
+        # 主任务不用进度条，直接打印任务名称（打印时没有活动的进度条重绘，避免错位）
+        console.print(f'\n[bold cyan]>>> Processing {task}[/bold cyan]')
 
-        task_bar = progress.add_task("Tasks", total=len(tasks))
+        input_mat_files_dir = os.path.join(data_dir, task, 'Matlab_files')
+        mat_files = os.listdir(input_mat_files_dir)
+        path_mat_files = [os.path.join(input_mat_files_dir, mat_file) for mat_file in mat_files]
+        dataset_dict = {} # 
 
-        for task in tasks:
-            if verbose:
-                console.print(f'\nProcessing {task}')
-
-            input_mat_files_dir = os.path.join(data_dir, task, 'Matlab_files')
-            mat_files = os.listdir(input_mat_files_dir)
-            path_mat_files = [os.path.join(input_mat_files_dir, mat_file) for mat_file in mat_files]
-            dataset_dict = {}
-
-            # Inner progress bar for the mat files of the current task
-            file_bar = progress.add_task(f"Processing {task} files", total=len(path_mat_files))
+        # 每个任务使用独立的 Progress 块：块退出后，100% 的进度条会保留在屏幕上
+        with Progress(
+            SpinnerColumn(), # 加载动画
+            TextColumn("[progress.description]{task.description}"), # 任务描述
+            BarColumn(), # 进度条
+            TaskProgressColumn(), # 任务百分比
+            MofNCompleteColumn(), # 已完成进度数
+            TimeRemainingColumn(), # 剩余时间
+            TimeElapsedColumn(), # 已用时间
+        ) as progress:
+            task_id = progress.add_task(f"Processing {task} files", total=len(path_mat_files))
 
             for mat_file in path_mat_files:
                 # get subject id from the file name
@@ -49,14 +53,16 @@ def ZuCo_data_v1(data_dir, save_data_dir, verbose=True):
                 dataset_dict[subject_name] = []
 
                 mat_data = io.loadmat(mat_file, squeeze_me=True, struct_as_record=False)['sentenceData']
+                mat_data = np.atleast_1d(mat_data) # 转换为列表，方便遍历
 
-                if verbose:
-                    console.print(f'  Processing subject {subject_name}')
+                
+
 
                 # Sentence level data
                 for sent in mat_data:
 
                     word_data = sent.word
+                    # 如果这句是有效的句子，才处理
                     if not isinstance(word_data, float):
 
                         # First key: sentence content
@@ -84,15 +90,14 @@ def ZuCo_data_v1(data_dir, save_data_dir, verbose=True):
 
                         # Features from eye-tracking
                         word_tokens_has_fixation = []
-                        word_tokens_with_mask = []
                         word_tokens_all = []
+                        word_tokens_with_mask = []
 
                         for word in word_data:
                             word_obj = {'content': word.content}
-                            word_tokens_all.append(word.content)
-
                             word_obj['n_fixations'] = word.nFixations
 
+                            # 如果这个词有fixation，才处理
                             if isinstance(word.nFixations, (int, np.integer)) and word.nFixations > 0:
 
                                 word_obj['word_level_EEG'] = {'FFD': {'FFD_t1': word.FFD_t1, 'FFD_t2': word.FFD_t2,
@@ -108,11 +113,14 @@ def ZuCo_data_v1(data_dir, save_data_dir, verbose=True):
                                                                     'GD_a1': word.GD_a1, 'GD_a2': word.GD_a2,
                                                                     'GD_b1': word.GD_b1, 'GD_b2': word.GD_b2,
                                                                     'GD_g1': word.GD_g1, 'GD_g2': word.GD_g2}
+                                
                                 sent_obj['word'].append(word_obj)
+                                word_tokens_all.append(word.content)
                                 word_tokens_has_fixation.append(word.content)
                                 word_tokens_with_mask.append(word.content)
 
                             else:
+                                # 如果这个词没有fixation，用MASK代替
                                 word_tokens_with_mask.append('[MASK]')
                                 continue
 
@@ -123,18 +131,15 @@ def ZuCo_data_v1(data_dir, save_data_dir, verbose=True):
                         dataset_dict[subject_name].append(sent_obj)
 
                 # one subject's mat file done
-                progress.advance(file_bar)
+                progress.advance(task_id, advance = 1)
 
-            # inner loop finished for this task, remove the file progress bar
-            progress.remove_task(file_bar)
-            progress.advance(task_bar)
+            # 进度条随 with 块退出而定格保留
 
-            # save the dataset_dict for each task
-            output_file = f'{task}_v1.pkl'
-            with open(os.path.join(EEG_data, output_file), 'wb') as handle:
-                pickle.dump(dataset_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-            if verbose:
-                console.print(f'\nSaved {task} dataset to {os.path.join(EEG_data, output_file)}')
+        # save the dataset_dict for each task
+        output_file = f'{task}_v1.pkl'
+        with open(os.path.join(EEG_data, output_file), 'wb') as handle:
+            pickle.dump(dataset_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 
 if __name__ == "__main__":
@@ -143,8 +148,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Load EEG data from version 1 of the ZuCo dataset')
     parser.add_argument('--data_dir', type=str, default=loc_data, help='Path to the ZuCo data directory.')
     parser.add_argument('--save_data_dir', type=str, default=os.getcwd(), help='Path to save the processed dataset. Defaults to current working directory.')
-    parser.add_argument('--verbose', action='store_true', help='Increase output verbosity.')
 
     args = parser.parse_args()
 
-    ZuCo_data_v1(args.data_dir, args.save_data_dir, args.verbose)
+    ZuCo_data_v1(args.data_dir, args.save_data_dir)
