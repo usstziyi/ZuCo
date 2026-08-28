@@ -21,7 +21,7 @@ def ZuCo_data_v1(data_dir, save_data_dir):
 
     console = Console()
 
-    EEG_data = os.path.join(save_data_dir, 'EEG_data')
+    EEG_data = os.path.join(save_data_dir, 'EEG_data', 'ZuCo1.0')
     os.makedirs(EEG_data, exist_ok=True)
 
     # Loop over the three tasks
