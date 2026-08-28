@@ -58,6 +58,9 @@ def ZuCo_data_v2_mat73(data_dir, save_data_dir):
                           ['mean_t1', 'mean_t2', 'mean_a1', 'mean_a2', 
                            'mean_b1', 'mean_b2', 'mean_g1', 'mean_g2']}
 
+            # 所有句子原始EEG信号（list, 整句EEG矩阵）
+            raw_data = sentences_data['rawData']
+
             with Progress(
                 SpinnerColumn(),
                 TextColumn("[progress.description]{task.description}"),
@@ -79,8 +82,12 @@ def ZuCo_data_v2_mat73(data_dir, save_data_dir):
                     if isinstance(word_data, dict):
                         # 句子内容
                         sent_obj = {'content': sent_content}
-                    
-                        # 句子级别的EEG平均特征
+
+                        # 添加句子级原始 EEG 信号
+                        sent_obj['rawData'] = raw_data[sent_idx]
+                       
+                        # 提取当前句子的句子级 EEG 平均特征（所有频带）
+                        # mean_fields 包含 mean_t1, mean_t2, mean_a1, mean_a2, mean_b1, mean_b2, mean_g1, mean_g2
                         sent_obj['sentence_level_EEG'] = {
                             field: mean_fields[field][sent_idx] 
                             for field in mean_fields.keys()

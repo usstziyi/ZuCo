@@ -64,16 +64,19 @@ def ZuCo_data_v1(data_dir, save_data_dir):
                         # First key: sentence content
                         sent_obj = {'content': sent.content}
 
-                        # second key: Oscillatory in different power bands (Theta, Alpha, Beta, Gamma)
+                        # 添加句子级原始 EEG 信号
+                        sent_obj['rawData'] = sent.rawData  # ndarray (105, 4212)
+
+                        # 存储句子水平的 EEG 特征（8 个频带均值，按频带分组）
                         sent_obj['sentence_level_EEG'] = {
-                            'mean_t1': sent.mean_t1, 
-                            'mean_t2': sent.mean_t2,
-                            'mean_a1': sent.mean_a1, 
-                            'mean_a2': sent.mean_a2,
-                            'mean_b1': sent.mean_b1, 
-                            'mean_b2': sent.mean_b2,
-                            'mean_g1': sent.mean_g1, 
-                            'mean_g2': sent.mean_g2
+                            'mean_t1': sent.mean_t1,   # theta 频带均值 1
+                            'mean_t2': sent.mean_t2,   # theta 频带均值 2
+                            'mean_a1': sent.mean_a1,   # alpha 频带均值 1
+                            'mean_a2': sent.mean_a2,   # alpha 频带均值 2
+                            'mean_b1': sent.mean_b1,   # beta 频带均值 1
+                            'mean_b2': sent.mean_b2,   # beta 频带均值 2
+                            'mean_g1': sent.mean_g1,   # gamma 频带均值 1
+                            'mean_g2': sent.mean_g2    # gamma 频带均值 2
                         }
 
                         if task == 'task1-SR':
