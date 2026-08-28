@@ -206,7 +206,7 @@ def main_v2_mat73(mat_file):
     # mat root
     data = mat73.loadmat(
         file = mat_file,
-        use_attrdict=True,
+        use_attrdict=False,
     ) # dict
     
     # 所有sentences
