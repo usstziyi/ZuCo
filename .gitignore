@@ -46,3 +46,5 @@ results/
 *.json
 
 EEG_data/
+
+uv.lock
