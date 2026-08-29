@@ -67,7 +67,7 @@ def ZuCo_data_v1(data_dir, save_data_dir, labels_file=None):
         # 主任务不用进度条，直接打印任务名称（打印时没有活动的进度条重绘，避免错位）
         console.print(f'\n[bold cyan]{task}[/bold cyan]')
 
-        input_mat_files_dir = os.path.join(data_dir, task, 'Matlab_files')
+        input_mat_files_dir = os.path.join(data_dir, task, 'Matlab files')
         mat_files = os.listdir(input_mat_files_dir)
         path_mat_files = [os.path.join(input_mat_files_dir, mat_file) for mat_file in mat_files]
         dataset_dict = {} # 存储每个主体的句子数据
